@@ -33,21 +33,6 @@ static void setup_covert_channel(ADDR_PTR* buf){
     }
 }
 
-// as sender start running , all cache in L2 should miss
-// return 1 if send started, else 0
-static uint8_t check_sender_status(ADDR_PTR* buf){
-	ADDR_PTR* tmp = buf;
-	printf("buf %p\n", buf);
-	for(; buf < tmp+L2_SIZE; buf+=8){
-		// return false if hit in L1 and L2
-		if( measure_one_block_access_time(buf) < L2_HIT_THRESHOLD){
-			printf("hit\n");
-            return 0;
-        }
-	}
-	printf("miss\n");
-	return 1;
-}
 
 static uint8_t check_send_data_signal(ADDR_PTR* buf){
 	while(get_set_index(buf) != 0) buf += 8;
