@@ -4,22 +4,14 @@
 #include <sys/mman.h>
 
 // [Bonus] TODO: define your own buffer size
-<<<<<<< HEAD
-#define BUFF_SIZE (1<<21)
-=======
 #define BUFF_SIZE (1<<24)
->>>>>>> master
 #define L2_SIZE 262144
 #define L2_SET_SIZE 32
 #define CACHE_LINE 64
 #define L2_SET_INDEX_MASK 0x0ffc0
 #define CACHE_LINE_BITS 6
 
-<<<<<<< HEAD
-static uint32_t eviction_set[8] = {2,4,6,8,10,12,14,16};
-=======
 static uint32_t eviction_set[8] = {2,6,10,14,18,22,26,30};
->>>>>>> master
 
 static uint32_t get_set_index(ADDR_PTR* addr){
 //	return (((uintptr_t)addr & L2_SET_INDEX_MASK) >> CACHE_LINE_BITS);
@@ -29,14 +21,9 @@ static uint32_t get_set_index(ADDR_PTR* addr){
 
 
 // occupy the entire L2 cache as a indicator for receiver to know that sender is running
-<<<<<<< HEAD
-static void covert_channel(void* buf){
-	void* tmp = buf;
-=======
 static void covert_channel(uint64_t* buf){
 //	for(int i = 0; i < 256; i++){ eviction_set[i] = i;}
 	uint64_t* tmp = buf;
->>>>>>> master
 	int attempt = 0;
 	while(attempt++ < 20){
 		buf = tmp;
@@ -50,14 +37,6 @@ static void covert_channel(uint64_t* buf){
 static void fill_one_L2_cache_set(ADDR_PTR* addr, uint32_t set){
 	int attempt = 0;
 	// find the address that will match to the set we are looking for
-<<<<<<< HEAD
-	while(get_set_index(addr) != 0) {addr += 1;}
-	addr += L2_SET_SIZE * set;
-	ADDR_PTR* tmp = addr;
-	// load the entire set
-	for(; addr < tmp+L2_SET_SIZE; addr+=8){
-		*addr = 1;	// load the cache block
-=======
 	while(get_set_index(addr) != set) {addr += 1;}
 //	addr += L2_SET_SIZE * set;
 	ADDR_PTR* tmp = addr;
@@ -65,36 +44,19 @@ static void fill_one_L2_cache_set(ADDR_PTR* addr, uint32_t set){
 	// load the entire set
 	for(; addr < tmp+L2_SET_SIZE; addr+=8){
 		*((char*)addr) = 1;	// load the cache block
->>>>>>> master
 	}
 }
 
 // send signal to receiver to prepare read data,
 // by occupy the entire set 0 in L2 cache
-<<<<<<< HEAD
-static inline void send_init_signal(void* addr){
-	while(get_set_index(addr) != 0) {addr += CACHE_LINE;}
-	void* tmp = addr;
-	for(; addr < tmp+L2_SET_SIZE; addr+=CACHE_LINE){
-=======
 static inline void send_init_signal(ADDR_PTR* addr){
 	while(get_set_index(addr) != 0) {addr += 8;}
 	ADDR_PTR* tmp = addr;
 	for(; addr < tmp+L2_SET_SIZE; addr+=8){
->>>>>>> master
     	*((char*)addr) = 1;  // load the cache block
    	}	
 }
 
-<<<<<<< HEAD
-static inline void send_data(uint8_t num, void* buf){
-	int attempt = 0;
-//	send_init_signal(buf);
-	while(attempt++ < 100000000){
-		for(int i = 0; i < 8; i++){
-			// if bit=1, occupy the set
-			if(num & (1<<i)) fill_one_L2_cache_set(buf, eviction_set[i]);
-=======
 static inline void send_data(uint8_t num, ADDR_PTR* buf){
 	int attempt = 0;
 //	send_init_signal(buf);
@@ -102,19 +64,13 @@ static inline void send_data(uint8_t num, ADDR_PTR* buf){
 		for(int i = 0; i < 8; i++){
 			// if bit=1, occupy the set
 			fill_one_L2_cache_set(buf, eviction_set[i]);
->>>>>>> master
 		}
 	}
 }
 
-<<<<<<< HEAD
-void test_l2_sets(void* buf){
-//	while(get_set_index(buf) != 8) {buf += 1;}
-=======
 void test_l2_sets(ADDR_PTR* buf){
 	while(get_set_index(buf) != 3) {buf += 1;}
 //	printf("%p\n", buf);
->>>>>>> master
 	for(int i = 0; i < 10; i++){
 		void* tmp = buf;
 		for(int i = 0; i < 4; i++){
@@ -147,13 +103,8 @@ int main(int argc, char **argv)
 	covert_channel(buf);
 
     printf("Please type a message.\n");
-<<<<<<< HEAD
-	while(1) {test_l2_sets(buf);}
-
-=======
 //	while(1) {test_l2_sets(buf);}
 	uint8_t start = 1;
->>>>>>> master
     bool sending = true;
     while (sending) {
         char text_buf[128];
@@ -162,24 +113,15 @@ int main(int argc, char **argv)
         // [Bonus] TODO:
         // Put your covert channel code here
 		uint8_t num = atoi(text_buf);
-<<<<<<< HEAD
-		send_data(num, buf);
-=======
 		for(int i = 0; i < 9; i++) {send_data(start, buf);}
 		for (int i = 0; i < 8; i++){
 			if(num & (1<<i)) {
 				send_data(num, buf);
 			}else usleep(1000000);
 		}
->>>>>>> master
 		printf("sent\n");	
     }
 
     printf("Sender finished.\n");
     return 0;
 }
-<<<<<<< HEAD
-
-
-=======
->>>>>>> master
